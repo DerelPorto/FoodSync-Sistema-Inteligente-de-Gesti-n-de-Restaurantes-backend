@@ -33,7 +33,7 @@ app.get('/', (req, res) => {
 });
 
 // Handle 404 - Unknown Routes
-app.all('*', (req, res, next) => {
+app.all(/(.*)/, (req, res, next) => {
     next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });
 
