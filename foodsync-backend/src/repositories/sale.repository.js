@@ -1,23 +1,14 @@
+
 import supabase from '../config/supabase.js';
 import AppError from '../utils/appError.js';
 
-class MenuRepository {
-    async createMenuItem(itemData) {
+class SaleRepository {
+    async create(saleData) {
         const { data, error } = await supabase
-            .from('menu_item')
-            .insert(itemData)
+            .from('sale')
+            .insert(saleData)
             .select()
             .single();
-
-        if (error) throw new AppError(`Supabase Error: ${error.message}`, 500);
-        return data;
-    }
-
-    async addRecipes(recipesData) {
-        const { data, error } = await supabase
-            .from('recipes')
-            .insert(recipesData)
-            .select();
 
         if (error) throw new AppError(`Supabase Error: ${error.message}`, 500);
         return data;
@@ -25,9 +16,8 @@ class MenuRepository {
 
     async findAll() {
         const { data, error } = await supabase
-            .from('menu_item')
-            .select('*, recipes(*)')
-            .eq('is_active', true);
+            .from('sale')
+            .select('*');
 
         if (error) throw new AppError(`Supabase Error: ${error.message}`, 500);
         return data;
@@ -35,20 +25,21 @@ class MenuRepository {
 
     async findById(id) {
         const { data, error } = await supabase
-            .from('menu_item')
-            .select('*, recipes(*)')
-            .eq('id', id)
+            .from('sale')
+            .select('*')
+            .eq('sale_id', id)
             .single();
 
-        if (error) throw new AppError('Menu item not found', 404);
+        if (error) throw new AppError('Sale not found', 404);
         return data;
     }
 
+    // Usually sales are not updated or deleted casually, but for completeness:
     async update(id, updates) {
         const { data, error } = await supabase
-            .from('menu_item')
+            .from('sale')
             .update(updates)
-            .eq('id', id)
+            .eq('sale_id', id)
             .select()
             .single();
 
@@ -56,12 +47,11 @@ class MenuRepository {
         return data;
     }
 
-    // Soft Delete
     async delete(id) {
         const { data, error } = await supabase
-            .from('menu_item')
-            .update({ is_active: false })
-            .eq('id', id)
+            .from('sale')
+            .delete()
+            .eq('sale_id', id)
             .select()
             .single();
 
@@ -70,4 +60,4 @@ class MenuRepository {
     }
 }
 
-export default new MenuRepository();
+export default new SaleRepository();

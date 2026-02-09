@@ -1,21 +1,22 @@
+
 import supabase from '../config/supabase.js';
 import AppError from '../utils/appError.js';
 
-class ClientRepository {
+class ShiftRepository {
     async create(data) {
-        const { data: newClient, error } = await supabase
-            .from('client')
+        const { data: newShift, error } = await supabase
+            .from('shift')
             .insert(data)
             .select()
             .single();
 
         if (error) throw new AppError(`Supabase Error: ${error.message}`, 500);
-        return newClient;
+        return newShift;
     }
 
     async findAll() {
         const { data, error } = await supabase
-            .from('client')
+            .from('shift')
             .select('*');
 
         if (error) throw new AppError(`Supabase Error: ${error.message}`, 500);
@@ -24,49 +25,41 @@ class ClientRepository {
 
     async findById(id) {
         const { data, error } = await supabase
-            .from('client')
+            .from('shift')
             .select('*')
-            .eq('client_id', id)
-            .single();
-
-        if (error) throw new AppError('Client not found', 404);
-        return data;
-    }
-
-    async findByPhone(phone) {
-        const { data, error } = await supabase
-            .from('client')
-            .select('*')
-            .eq('phone', phone)
+            .eq('shift_id', id)
             .maybeSingle();
 
         if (error) throw new AppError(`Supabase Error: ${error.message}`, 500);
-        return data; // Returns null if not found, which is what service usually expects for "check if exists"
+        if (!data) throw new AppError('Shift not found', 404);
+        return data;
     }
 
     async update(id, updates) {
         const { data, error } = await supabase
-            .from('client')
+            .from('shift')
             .update(updates)
-            .eq('client_id', id)
+            .eq('shift_id', id)
             .select()
-            .single();
+            .maybeSingle();
 
         if (error) throw new AppError(`Supabase Error: ${error.message}`, 500);
+        if (!data) throw new AppError('Shift not found', 404);
         return data;
     }
 
     async delete(id) {
         const { data, error } = await supabase
-            .from('client')
+            .from('shift')
             .delete()
-            .eq('client_id', id)
-            .select() // Returning the deleted record is good for confirmation
-            .single();
+            .eq('shift_id', id)
+            .select()
+            .maybeSingle();
 
         if (error) throw new AppError(`Supabase Error: ${error.message}`, 500);
+        if (!data) throw new AppError('Shift not found', 404);
         return data;
     }
 }
 
-export default new ClientRepository();
+export default new ShiftRepository();
