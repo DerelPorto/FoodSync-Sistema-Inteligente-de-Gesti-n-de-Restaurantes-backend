@@ -77,56 +77,58 @@ router
 
 router
     .route('/:id')
-/**
- * @openapi
- * /employee/{id}:
- *   patch:
- *     summary: Update an employee
- *     tags: [Employee]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *         description: The employee ID
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               position:
- *                 type: string
- *     responses:
- *       200:
- *         description: The updated employee
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: success
- *                 data:
- *                   type: object
- *   delete:
- *     summary: Delete an employee
- *     tags: [Employee]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *         description: The employee ID
- *     responses:
- *       204:
- *         description: Employee deleted successfully
- */
+    /**
+     * @openapi
+     * /employee/{id}:
+     *   patch:
+     *     summary: Update an employee
+     *     tags: [Employee]
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         schema:
+     *           type: integer
+     *         required: true
+     *         description: The employee ID
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               name:
+     *                 type: string
+     *               position:
+     *                 type: string
+     *     responses:
+     *       200:
+     *         description: The updated employee
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 status:
+     *                   type: string
+     *                   example: success
+     *                 data:
+     *                   type: object
+     *   delete:
+     *     summary: Delete an employee
+     *     tags: [Employee]
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         schema:
+     *           type: integer
+     *         required: true
+     *         description: The employee ID
+     *     responses:
+     *       204:
+     *         description: Employee deleted successfully
+     */
+    .patch(employeeController.updateEmployee)
+    .delete(employeeController.deleteEmployee);
 
 export default router;

@@ -1,22 +1,14 @@
+
 import supabase from '../config/supabase.js';
 import AppError from '../utils/appError.js';
 
-class MenuRepository {
-    async createMenuItem(itemData) {
+class SaleDetailRepository {
+    async create(detailData) {
+        // detailData can be an array or a single object.
+        // If array, insert([])
         const { data, error } = await supabase
-            .from('menu_item')
-            .insert(itemData)
-            .select()
-            .single();
-
-        if (error) throw new AppError(`Supabase Error: ${error.message}`, 500);
-        return data;
-    }
-
-    async addRecipes(recipesData) {
-        const { data, error } = await supabase
-            .from('recipes')
-            .insert(recipesData)
+            .from('sale_detail')
+            .insert(detailData)
             .select();
 
         if (error) throw new AppError(`Supabase Error: ${error.message}`, 500);
@@ -25,9 +17,8 @@ class MenuRepository {
 
     async findAll() {
         const { data, error } = await supabase
-            .from('menu_item')
-            .select('*, recipes(*)')
-            .eq('is_active', true);
+            .from('sale_detail')
+            .select('*');
 
         if (error) throw new AppError(`Supabase Error: ${error.message}`, 500);
         return data;
@@ -35,20 +26,31 @@ class MenuRepository {
 
     async findById(id) {
         const { data, error } = await supabase
-            .from('menu_item')
-            .select('*, recipes(*)')
-            .eq('id', id)
+            .from('sale_detail')
+            .select('*')
+            .eq('sale_detail_id', id)
             .single();
 
-        if (error) throw new AppError('Menu item not found', 404);
+        if (error) throw new AppError('Sale Detail not found', 404);
         return data;
     }
 
+    async findBySaleId(saleId) {
+        const { data, error } = await supabase
+            .from('sale_detail')
+            .select('*')
+            .eq('sale_id', saleId);
+
+        if (error) throw new AppError(`Supabase Error: ${error.message}`, 500);
+        return data;
+    }
+
+    // Additional methods if needed for managing details individually
     async update(id, updates) {
         const { data, error } = await supabase
-            .from('menu_item')
+            .from('sale_detail')
             .update(updates)
-            .eq('id', id)
+            .eq('sale_detail_id', id)
             .select()
             .single();
 
@@ -56,12 +58,11 @@ class MenuRepository {
         return data;
     }
 
-    // Soft Delete
     async delete(id) {
         const { data, error } = await supabase
-            .from('menu_item')
-            .update({ is_active: false })
-            .eq('id', id)
+            .from('sale_detail')
+            .delete()
+            .eq('sale_detail_id', id)
             .select()
             .single();
 
@@ -70,4 +71,4 @@ class MenuRepository {
     }
 }
 
-export default new MenuRepository();
+export default new SaleDetailRepository();
