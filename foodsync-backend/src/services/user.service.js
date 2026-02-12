@@ -1,3 +1,4 @@
+import bcrypt from 'bcrypt';
 import userRepository from '../repositories/user.repository.js';
 import AppError from '../utils/appError.js';
 
@@ -14,9 +15,9 @@ class UserService {
             throw new AppError('Email already in use', 400);
         }
 
-        // TODO: Hash password before saving
-        // const hashedPassword = await bcrypt.hash(data.password, 12);
-        // data.password = hashedPassword;
+        // Hash password before saving
+        const hashedPassword = await bcrypt.hash(data.password, 12);
+        data.password = hashedPassword;
 
         // Default to active true if not specified
         if (data.active === undefined) {
@@ -40,7 +41,7 @@ class UserService {
     async updateUser(id, updates) {
         // Prevent updating password directly here if we want a separate route, or handle hashing if included
         if (updates.password) {
-            // TODO: Hash new password
+            updates.password = await bcrypt.hash(updates.password, 12);
         }
 
         return await userRepository.update(id, updates);

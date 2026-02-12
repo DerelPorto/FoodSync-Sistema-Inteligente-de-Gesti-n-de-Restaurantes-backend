@@ -13,6 +13,7 @@ import saleRoutes from './sale.routes.js';
 import saleDetailRoutes from './saleDetail.routes.js';
 import shiftRoutes from './shift.routes.js';
 import dailyReportRoutes from './dailyReport.routes.js';
+import authRoutes from './auth.routes.js';
 
 router.get('/health', (req, res) => {
     res.status(200).json({ status: 'success', message: 'API is healthy' });
@@ -30,5 +31,6 @@ router.use('/sales', saleRoutes);
 router.use('/sale-details', saleDetailRoutes);
 router.use('/shifts', shiftRoutes);
 router.use('/daily-reports', dailyReportRoutes);
+router.use('/auth', authRoutes);
 
 export default router;
