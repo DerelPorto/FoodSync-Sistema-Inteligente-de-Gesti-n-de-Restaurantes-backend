@@ -55,6 +55,19 @@ class ReservationRepository {
         return data;
     }
 
+    async findOverlapping(tableId, date, time) {
+        const { data, error } = await supabase
+            .from('reservation')
+            .select('reservation_id')
+            .eq('table_id', tableId)
+            .eq('date', date)
+            .eq('time', time)
+            .neq('status', 'cancelled');
+
+        if (error) throw new AppError(`Supabase Error: ${error.message}`, 500);
+        return data; // length > 0 means there is a conflict
+    }
+
     async delete(id) {
         // Assuming hard delete for now or status update to 'cancelled' if soft delete preferred, but schema implies just status. 
         // Let's implement status update to cancelled as a 'delete' action or just provide update.
