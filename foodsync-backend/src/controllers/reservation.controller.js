@@ -13,6 +13,17 @@ class ReservationController {
         });
     });
 
+    getAvailableTables = catchAsync(async (req, res, next) => {
+        const { date, time, people_count } = req.query;
+        const tables = await reservationService.getAvailableTables(date, time, Number(people_count));
+
+        res.status(200).json({
+            status: 'success',
+            results: tables.length,
+            data: { tables }
+        });
+    });
+
     getAllReservations = catchAsync(async (req, res, next) => {
         const reservations = await reservationService.getAllReservations();
 

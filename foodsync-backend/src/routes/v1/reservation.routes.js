@@ -82,7 +82,64 @@ router
     .post(reservationController.createReservation);
 
 router
+    .route('/available-tables')
+    /**
+     * @openapi
+     * /reservations/available-tables:
+     *   get:
+     *     summary: Get available tables for a given date, time and party size
+     *     tags: [Reservations]
+     *     parameters:
+     *       - in: query
+     *         name: date
+     *         required: true
+     *         schema:
+     *           type: string
+     *           format: date
+     *           example: '2026-03-10'
+     *       - in: query
+     *         name: time
+     *         required: true
+     *         schema:
+     *           type: string
+     *           format: time
+     *           example: '19:00'
+     *       - in: query
+     *         name: people_count
+     *         required: true
+     *         schema:
+     *           type: integer
+     *           example: 4
+     *     responses:
+     *       200:
+     *         description: List of available tables
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 status:
+     *                   type: string
+     *                   example: success
+     *                 results:
+     *                   type: integer
+     *                 data:
+     *                   type: object
+     *                   properties:
+     *                     tables:
+     *                       type: array
+     *                       items:
+     *                         type: object
+     *       400:
+     *         description: Missing required query parameters
+     *       409:
+     *         description: No tables available
+     */
+    .get(reservationController.getAvailableTables);
+
+router
     .route('/:id')
+
     /**
      * @openapi
      * /reservations/{id}:
