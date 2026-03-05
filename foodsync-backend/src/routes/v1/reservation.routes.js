@@ -45,6 +45,7 @@ router
      *               - date
      *               - time
      *               - people_count
+     *               - email
      *             properties:
      *               client_id:
      *                 type: integer
@@ -61,6 +62,9 @@ router
      *               status:
      *                 type: string
      *                 default: pending
+     *               email:
+     *                 type: string
+     *                 format: email
      *     responses:
      *       201:
      *         description: The created reservation
@@ -196,6 +200,9 @@ router
      *                 type: integer
      *               status:
      *                 type: string
+     *               email:
+     *                 type: string
+     *                 format: email
      *     responses:
      *       200:
      *         description: The updated reservation
