@@ -16,7 +16,8 @@ class ClientRepository {
     async findAll() {
         const { data, error } = await supabase
             .from('client')
-            .select('*');
+            .select('*')
+            .eq('is_active', true);
 
         if (error) throw new AppError(`Supabase Error: ${error.message}`, 500);
         return data;
@@ -27,9 +28,10 @@ class ClientRepository {
             .from('client')
             .select('*')
             .eq('client_id', id)
+            .eq('is_active', true)
             .single();
 
-        if (error) throw new AppError('Client not found', 404);
+        if (error) throw new AppError('Client not found or is inactive', 404);
         return data;
     }
 
@@ -38,6 +40,7 @@ class ClientRepository {
             .from('client')
             .select('*')
             .eq('phone', phone)
+            .eq('is_active', true)
             .maybeSingle();
 
         if (error) throw new AppError(`Supabase Error: ${error.message}`, 500);
@@ -57,14 +60,26 @@ class ClientRepository {
     }
 
     async delete(id) {
+        if (!id || id === '{id}') {
+            throw new AppError('ID de cliente inválido', 400);
+        }
+
         const { data, error } = await supabase
             .from('client')
-            .delete()
+            .update({ is_active: false })
             .eq('client_id', id)
-            .select() // Returning the deleted record is good for confirmation
+            .select() // Returning the updated record is good for confirmation
             .single();
 
-        if (error) throw new AppError(`Supabase Error: ${error.message}`, 500);
+        if (error) {
+            if (error.code === '23503') {
+                throw new AppError('No se puede eliminar el cliente porque tiene reservaciones registradas.', 400);
+            }
+            if (error.code === '22P02') {
+                throw new AppError('Formato de ID inválido.', 400);
+            }
+            throw new AppError(`Supabase Error: ${error.message}`, 500);
+        }
         return data;
     }
 }
