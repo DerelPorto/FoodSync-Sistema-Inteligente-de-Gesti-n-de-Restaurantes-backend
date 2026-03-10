@@ -5,8 +5,8 @@ import AppError from '../utils/appError.js';
 class ReservationService {
     async createReservation(data) {
         // Validate required fields
-        if (!data.client_id || !data.date || !data.time || !data.people_count || !data.email) {
-            throw new AppError('Client, date, time, people count, and email are required', 400);
+        if (!data.client_id || !data.date || !data.time || !data.people_count) {
+            throw new AppError('Client, date, time, and people count are required', 400);
         }
 
         // Default status
@@ -14,8 +14,8 @@ class ReservationService {
             data.status = 'pending';
         }
 
-        // Validate email format
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+        // Validate email format only if provided
+        if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
             throw new AppError('Invalid email format', 400);
         }
 
