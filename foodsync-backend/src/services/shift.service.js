@@ -14,10 +14,10 @@ class ShiftService {
         try {
             await employeeRepository.findById(data.employee_id);
         } catch (error) {
-            if (error.statusCode === 404) {
-                throw new AppError('Employee not found', 404);
+            if (error.statusCode === 404 || error.message.includes('not found') || error.message.includes('PGRST116')) {
+                throw new AppError(`El empleado seleccionado (ID: ${data.employee_id}) no existe o fue eliminado.`, 404);
             }
-            throw error;
+            throw new AppError(`Error validando empleado: ${error.message}`, 500);
         }
 
         return await shiftRepository.create(data);
@@ -32,6 +32,16 @@ class ShiftService {
     }
 
     async updateShift(id, updates) {
+        if (updates.employee_id) {
+            try {
+                await employeeRepository.findById(updates.employee_id);
+            } catch (error) {
+                if (error.statusCode === 404 || error.message.includes('not found') || error.message.includes('PGRST116')) {
+                    throw new AppError(`El empleado seleccionado (ID: ${updates.employee_id}) no existe o fue eliminado.`, 404);
+                }
+                throw new AppError(`Error validando empleado: ${error.message}`, 500);
+            }
+        }
         return await shiftRepository.update(id, updates);
     }
 

@@ -66,7 +66,15 @@ class SaleDetailRepository {
             .select()
             .single();
 
-        if (error) throw new AppError(`Supabase Error: ${error.message}`, 500);
+        if (error) {
+            if (error.code === '23503') {
+                throw new AppError('No se puede eliminar el registro asociado al sistema.', 400);
+            }
+            if (error.code === '22P02') {
+                throw new AppError('Formato de ID inválido.', 400);
+            }
+            throw new AppError(`Supabase Error: ${error.message}`, 500);
+        }
         return data;
     }
 }

@@ -37,6 +37,16 @@ class DailyReportController {
             }
         });
     });
+
+    deleteReport = catchAsync(async (req, res, next) => {
+        const { id } = req.params;
+        await dailyReportService.deleteReport(id);
+
+        res.status(204).json({
+            status: 'success',
+            data: null
+        });
+    });
 }
 
 export default new DailyReportController();

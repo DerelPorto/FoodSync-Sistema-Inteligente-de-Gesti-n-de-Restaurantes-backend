@@ -11,7 +11,8 @@ router
 
 router
     .route('/:id')
-    .get(dailyReportController.getReportById);
+    .get(dailyReportController.getReportById)
+    .delete(dailyReportController.deleteReport);
 
 export default router;
 
@@ -60,6 +61,20 @@ export default router;
  *     responses:
  *       "200":
  *         description: OK
+ *       "404":
+ *         description: Not found
+ *   delete:
+ *     summary: Delete a daily report
+ *     tags: [DailyReports]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       "204":
+ *         description: No content
  *       "404":
  *         description: Not found
  */

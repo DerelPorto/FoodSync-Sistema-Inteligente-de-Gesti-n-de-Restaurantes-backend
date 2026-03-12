@@ -10,8 +10,16 @@ class ClientService {
         // Check if phone already exists to avoid duplicates
         const existingClient = await clientRepository.findByPhone(data.phone);
         if (existingClient) {
-            // For reservation systems, returning the existing client prevents flow blockage.
-            return existingClient;
+            if (existingClient.is_active) {
+                // For reservation systems, returning the existing client prevents flow blockage.
+                return existingClient;
+            } else {
+                // Reactivate soft-deleted client
+                return await clientRepository.update(existingClient.client_id, {
+                    name: data.name,
+                    is_active: true
+                });
+            }
         }
 
         return await clientRepository.create(data);

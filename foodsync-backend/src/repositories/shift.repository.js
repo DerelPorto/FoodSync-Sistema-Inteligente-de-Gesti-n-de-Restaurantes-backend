@@ -56,7 +56,15 @@ class ShiftRepository {
             .select()
             .maybeSingle();
 
-        if (error) throw new AppError(`Supabase Error: ${error.message}`, 500);
+        if (error) {
+            if (error.code === '23503') {
+                throw new AppError('No se puede eliminar el turno porque tiene registros asociados.', 400);
+            }
+            if (error.code === '22P02') {
+                throw new AppError('Formato de ID inválido.', 400);
+            }
+            throw new AppError(`Supabase Error: ${error.message}`, 500);
+        }
         if (!data) throw new AppError('Shift not found', 404);
         return data;
     }

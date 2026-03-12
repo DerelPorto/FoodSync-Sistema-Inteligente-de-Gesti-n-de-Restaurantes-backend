@@ -39,14 +39,15 @@ class UserRepository {
             .from('app_user')
             .select('*')
             .eq('email', email)
-            .single();
-            
+            .order('active', { ascending: false }) // prioritize resolving active first
+            .limit(1);
+
         // Don't throw 404 here, just return null or data, let service handle logic
-         if (error && error.code !== 'PGRST116') { // PGRST116 is 'Results contain 0 rows'
+        if (error) { // we replaced .single with .limit(1) so PGRST116 won't be thrown usually
             throw new AppError(`Supabase Error: ${error.message}`, 500);
         }
-        
-        return data;
+
+        return data && data.length > 0 ? data[0] : null;
     }
 
     async update(id, updates) {
