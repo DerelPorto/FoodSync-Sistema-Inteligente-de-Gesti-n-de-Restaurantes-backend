@@ -24,7 +24,9 @@ class DailyReportService {
         return await dailyReportRepository.findById(id);
     }
 
-    // Usually these are generated, but manual creation/retrieval is fine for now.
+    async deleteReport(id) {
+        return await dailyReportRepository.delete(id);
+    }
 }
 
 export default new DailyReportService();

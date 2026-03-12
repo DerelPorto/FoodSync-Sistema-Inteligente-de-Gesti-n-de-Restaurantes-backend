@@ -55,7 +55,15 @@ class SaleRepository {
             .select()
             .single();
 
-        if (error) throw new AppError(`Supabase Error: ${error.message}`, 500);
+        if (error) {
+            if (error.code === '23503') {
+                throw new AppError('No se puede eliminar la venta porque tiene detalles o pagos asociados. Elimine primero los dependientes.', 400);
+            }
+            if (error.code === '22P02') {
+                throw new AppError('Formato de ID inválido.', 400);
+            }
+            throw new AppError(`Supabase Error: ${error.message}`, 500);
+        }
         return data;
     }
 }

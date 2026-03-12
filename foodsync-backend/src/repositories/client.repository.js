@@ -40,11 +40,11 @@ class ClientRepository {
             .from('client')
             .select('*')
             .eq('phone', phone)
-            .eq('is_active', true)
-            .maybeSingle();
+            .order('is_active', { ascending: false })
+            .limit(1);
 
         if (error) throw new AppError(`Supabase Error: ${error.message}`, 500);
-        return data; // Returns null if not found, which is what service usually expects for "check if exists"
+        return data && data.length > 0 ? data[0] : null;
     }
 
     async update(id, updates) {

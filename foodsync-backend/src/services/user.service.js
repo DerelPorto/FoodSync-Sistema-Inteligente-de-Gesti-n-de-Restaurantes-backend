@@ -12,7 +12,18 @@ class UserService {
         // Check if email already exists
         const existingUser = await userRepository.findByEmail(data.email);
         if (existingUser) {
-            throw new AppError('Email already in use', 400);
+            if (existingUser.active) {
+                throw new AppError('Email already in use', 400);
+            } else {
+                // Reactivate physically instead of creating a new duplicate row
+                const hashedPassword = await bcrypt.hash(data.password, 12);
+                return await userRepository.update(existingUser.user_id, {
+                    name: data.name,
+                    password: hashedPassword,
+                    active: true,
+                    // keep other fields intact if needed or update them
+                });
+            }
         }
 
         // Hash password before saving
