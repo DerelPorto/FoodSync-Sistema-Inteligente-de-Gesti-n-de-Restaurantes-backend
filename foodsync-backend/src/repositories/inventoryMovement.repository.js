@@ -3,9 +3,13 @@ import AppError from '../utils/appError.js';
 
 class InventoryMovementRepository {
     async create(data) {
+        const { movement_type, ...rest } = data;
+        const normalizedType = ['IN', 'in', 'entrada', 'ENTRADA'].includes(movement_type) ? 'in' : 'out';
+        const payload = { ...rest, movement_type: normalizedType };
+
         const { data: newMovement, error } = await supabase
             .from('inventory_movement')
-            .insert(data)
+            .insert(payload)
             .select()
             .single();
 
