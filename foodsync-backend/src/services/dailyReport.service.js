@@ -11,9 +11,15 @@ class DailyReportService {
             throw new AppError('Report for this date already exists', 400);
         }
 
-        const report = new DailyReport(data);
+        const { notes, ...rest } = data;
+        const payload = {
+            ...rest,
+            total_sales: data.total_sales ?? 0,
+            total_reservations: data.total_reservations ?? 0,
+        };
+        const report = new DailyReport(payload);
         report.validate();
-        return await dailyReportRepository.create(data);
+        return await dailyReportRepository.create(payload);
     }
 
     async getAllReports() {
