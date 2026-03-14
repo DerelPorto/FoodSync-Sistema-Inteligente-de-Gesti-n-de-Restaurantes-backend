@@ -3,6 +3,17 @@ import AppError from '../utils/appError.js';
 
 class ClientRepository {
     async create(data) {
+        const {data: existingClient, error: checkError} = await supabase
+            .from('client')
+            .select('*')
+            .or(`name.eq.${data.name}, phone.eq.${data.phone}`)
+            .maybeSingle();
+
+        if(existingClient) {
+            const conflictField =  existingClient.name === data.name ? 'Nombre' : 'Telefono';
+            throw new AppError(`El ${conflictField} ya está en uso`, 400);
+        }
+        
         const { data: newClient, error } = await supabase
             .from('client')
             .insert(data)
@@ -69,7 +80,7 @@ class ClientRepository {
             .update({ is_active: false })
             .eq('client_id', id)
             .select() // Returning the updated record is good for confirmation
-            .single();
+            .maybeSingle();
 
         if (error) {
             if (error.code === '23503') {
