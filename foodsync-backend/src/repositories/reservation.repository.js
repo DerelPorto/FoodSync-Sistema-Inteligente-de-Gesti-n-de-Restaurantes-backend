@@ -55,6 +55,17 @@ class ReservationRepository {
         return data;
     }
 
+    async findByDate(date) {
+        const { data, error } = await supabase
+            .from('reservation')
+            .select('*')
+            .eq('date', date)
+            .neq('status', 'cancelled');
+
+        if (error) throw new AppError(`Supabase Error: ${error.message}`, 500);
+        return data || [];
+    }
+
     async findOverlapping(tableId, date, time) {
         const { data, error } = await supabase
             .from('reservation')
@@ -69,23 +80,19 @@ class ReservationRepository {
     }
 
     async delete(id) {
-        // Assuming hard delete for now or status update to 'cancelled' if soft delete preferred, but schema implies just status. 
-        // Let's implement status update to cancelled as a 'delete' action or just provide update.
-        // But usually delete means delete or soft delete. Let's do a soft delete by setting status to 'cancelled' if that's the intention, 
-        // OR actual delete row. 
-        // Given previous pattern (user/menu), let's assume we might want to just update status to 'cancelled' primarily.
-        // However, standard delete endpoint usually expects removal or hiding.
-        // Let's stick to update status for logic, but maybe a delete method for admin cleanup?
-        // Let's implement actual delete for now but service layer can decide to use update status instead.
-
         const { data, error } = await supabase
             .from('reservation')
-            .delete()
+            .update({ status: 'cancelled' })
             .eq('reservation_id', id)
             .select()
             .single();
 
-        if (error) throw new AppError(`Supabase Error: ${error.message}`, 500);
+        if (error) {
+            if (error.code === '22P02') {
+                throw new AppError('Formato de ID inválido.', 400);
+            }
+            throw new AppError(`Supabase Error: ${error.message}`, 500);
+        }
         return data;
     }
 }

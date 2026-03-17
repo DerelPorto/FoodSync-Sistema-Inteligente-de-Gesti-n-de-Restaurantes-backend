@@ -10,11 +10,16 @@ class ClientService {
         // Check if phone already exists to avoid duplicates
         const existingClient = await clientRepository.findByPhone(data.phone);
         if (existingClient) {
-            // Option: return existing client or throw error.
-            // For reservation systems, usually we might just return the existing client or update it.
-            // Let's assume we want to prevent duplicates or just return the existing one.
-            // Throwing error for now to be explicit.
-            throw new AppError('Client with this phone number already exists', 400);
+            if (existingClient.is_active) {
+                // For reservation systems, returning the existing client prevents flow blockage.
+                return existingClient;
+            } else {
+                // Reactivate soft-deleted client
+                return await clientRepository.update(existingClient.client_id, {
+                    name: data.name,
+                    is_active: true
+                });
+            }
         }
 
         return await clientRepository.create(data);

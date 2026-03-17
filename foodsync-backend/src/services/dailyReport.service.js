@@ -11,9 +11,15 @@ class DailyReportService {
             throw new AppError('Report for this date already exists', 400);
         }
 
-        const report = new DailyReport(data);
+        const { notes, ...rest } = data;
+        const payload = {
+            ...rest,
+            total_sales: data.total_sales ?? 0,
+            total_reservations: data.total_reservations ?? 0,
+        };
+        const report = new DailyReport(payload);
         report.validate();
-        return await dailyReportRepository.create(data);
+        return await dailyReportRepository.create(payload);
     }
 
     async getAllReports() {
@@ -24,7 +30,9 @@ class DailyReportService {
         return await dailyReportRepository.findById(id);
     }
 
-    // Usually these are generated, but manual creation/retrieval is fine for now.
+    async deleteReport(id) {
+        return await dailyReportRepository.delete(id);
+    }
 }
 
 export default new DailyReportService();

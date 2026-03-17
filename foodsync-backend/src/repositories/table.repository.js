@@ -17,6 +17,7 @@ class TableRepository {
         const { data, error } = await supabase
             .from('restaurant_table')
             .select('*')
+            .eq('is_active', true)
             .order('table_number', { ascending: true });
 
         if (error) throw new AppError(`Supabase Error: ${error.message}`, 500);
@@ -28,9 +29,10 @@ class TableRepository {
             .from('restaurant_table')
             .select('*')
             .eq('table_id', id)
+            .eq('is_active', true)
             .single();
 
-        if (error) throw new AppError('Table not found', 404);
+        if (error) throw new AppError('Table not found or is inactive', 404);
         return data;
     }
 
@@ -39,10 +41,11 @@ class TableRepository {
             .from('restaurant_table')
             .select('*')
             .eq('table_number', tableNumber)
-            .single();
+            .order('is_active', { ascending: false }) // prioritize resolving active first
+            .limit(1);
 
         if (error) throw new AppError(`Supabase Error: ${error.message}`, 500);
-        return data;
+        return data && data.length > 0 ? data[0] : null;
     }
 
     async update(id, updates) {
@@ -63,6 +66,7 @@ class TableRepository {
             .from('restaurant_table')
             .select('*')
             .gte('capacity', peopleCount)
+            .eq('is_active', true)
             .order('table_number', { ascending: true });
 
         if (error) throw new AppError(`Supabase Error: ${error.message}`, 500);
@@ -84,14 +88,24 @@ class TableRepository {
     }
 
     async delete(id) {
+        if (!id || id === '{id}') {
+            throw new AppError('ID de mesa inválido', 400);
+        }
+
         const { data, error } = await supabase
             .from('restaurant_table')
-            .delete()
+            .update({ is_active: false })
             .eq('table_id', id)
             .select()
             .single();
 
-        if (error) throw new AppError(`Supabase Error: ${error.message}`, 500);
+        if (error) {
+            if (error.code === '22P02') {
+                throw new AppError('Formato de ID inválido.', 400);
+            }
+            throw new AppError(`Supabase Error: ${error.message}`, 500);
+        }
+
         return data;
     }
 }

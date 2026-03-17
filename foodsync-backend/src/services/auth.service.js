@@ -27,6 +27,8 @@ class AuthService {
 
         // Remove password from output
         user.password = undefined;
+        // Role slug for frontend: role_id 2 = viewer, else admin (no role table required)
+        user.role = user.role_id === 2 ? 'viewer' : 'admin';
 
         return { user, token };
     }

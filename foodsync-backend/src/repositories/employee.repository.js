@@ -29,7 +29,12 @@ class EmployeeRepository {
             .eq('employee_id', id)
             .single();
 
-        if (error) throw new AppError('Employee not found', 404);
+        if (error) {
+            if (error.code === 'PGRST116') {
+                throw new AppError('Employee not found', 404);
+            }
+            throw new AppError(`Supabase Error: ${error.message}`, 500);
+        }
         return data;
     }
 
@@ -53,7 +58,15 @@ class EmployeeRepository {
             .select()
             .single();
 
-        if (error) throw new AppError(`Supabase Error: ${error.message}`, 500);
+        if (error) {
+            if (error.code === '23503') {
+                throw new AppError('No se puede eliminar el empleado porque tiene turnos asignados u otros registros dependientes.', 400);
+            }
+            if (error.code === '22P02') {
+                throw new AppError('Formato de ID inválido.', 400);
+            }
+            throw new AppError(`Supabase Error: ${error.message}`, 500);
+        }
         return data;
     }
 }

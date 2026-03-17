@@ -53,7 +53,7 @@ class ClientController {
         const { id } = req.params;
         await clientService.deleteClient(id);
 
-        res.status(204).json({
+        res.status(200).json({
             status: 'success',
             data: null
         });

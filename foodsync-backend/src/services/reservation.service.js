@@ -1,5 +1,7 @@
 import reservationRepository from '../repositories/reservation.repository.js';
 import tableRepository from '../repositories/table.repository.js';
+import clientRepository from '../repositories/client.repository.js';
+import whatsappService from './whatsapp.service.js';
 import AppError from '../utils/appError.js';
 
 class ReservationService {
@@ -12,6 +14,11 @@ class ReservationService {
         // Default status
         if (!data.status) {
             data.status = 'pending';
+        }
+
+        // Validate email format only if provided
+        if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+            throw new AppError('Invalid email format', 400);
         }
 
         // --- Availability check ---
@@ -51,7 +58,20 @@ class ReservationService {
             );
         }
 
-        return await reservationRepository.create(data);
+        const savedReservation = await reservationRepository.create(data);
+
+        // Enviar notificación de confirmación de recepción
+        try {
+            const client = await clientRepository.findById(data.client_id);
+            if (client && client.phone) {
+                const msg = `🍽️ *FoodSync Restaurante*\n¡Hola ${client.name}! 👋\nHemos recibido tu solicitud de reservación para ${data.people_count} personas el día ${data.date} a las ${data.time}.\n\n⏳ Tu reserva está *Pendiente* de confirmación manual por nuestro equipo. Te avisaremos en breve.`;
+                whatsappService.sendMessage(client.phone, msg);
+            }
+        } catch (err) {
+            console.error('Error enviando WhatsApp en creación:', err);
+        }
+
+        return savedReservation;
     }
 
     async getAvailableTables(date, time, peopleCount) {
@@ -73,12 +93,66 @@ class ReservationService {
         return await reservationRepository.findByClient(clientId);
     }
 
+    async getReservationsByDateWithClients(date) {
+        const reservations = await reservationRepository.findByDate(date);
+        if (reservations.length === 0) return [];
+        const clientIds = [...new Set(reservations.map(r => r.client_id).filter(Boolean))];
+        const clients = await clientRepository.findByIds(clientIds);
+        const clientMap = {};
+        clients.forEach(c => { clientMap[c.client_id] = c; });
+        return reservations.map(r => ({
+            ...r,
+            client: clientMap[r.client_id] || null,
+        }));
+    }
+
     async updateReservation(id, updates) {
-        return await reservationRepository.update(id, updates);
+        // Validate email format if provided
+        if (updates.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(updates.email)) {
+            throw new AppError('Invalid email format', 400);
+        }
+
+        const updatedReservation = await reservationRepository.update(id, updates);
+
+        // Check if we need to send a WS message
+        if (updates.status === 'confirmed' || updates.status === 'cancelled' || updates.status === 'canceled') {
+            try {
+                const fullRes = await reservationRepository.findById(id);
+                if (fullRes) {
+                    const client = await clientRepository.findById(fullRes.client_id);
+                    if (client && client.phone) {
+                        let msg = '';
+                        if (updates.status === 'confirmed') {
+                            msg = `🍽️ *FoodSync Restaurante*\n¡Excelente noticia ${client.name}! ✅\n\nTu reservación ha sido *Confirmada* para el día ${fullRes.date} a las ${fullRes.time} (Mesa #${fullRes.table_id || fullRes.table_number}).\n\n¡Te esperamos!`;
+                        } else {
+                            msg = `🍽️ *FoodSync Restaurante*\nHola ${client.name}. Lamentamos informarte que tu solicitud de reservación para el día ${fullRes.date} a las ${fullRes.time} ha sido *Cancelada*. ❌\n\nComunícate por este medio para agendar en otra fecha u horario.`;
+                        }
+                        whatsappService.sendMessage(client.phone, msg);
+                    }
+                }
+            } catch (err) {
+                console.error('Error enviando WhatsApp en actualización:', err);
+            }
+        }
+
+        return updatedReservation;
     }
 
     async cancelReservation(id) {
-        return await reservationRepository.update(id, { status: 'cancelled' });
+        const cancelledReservation = await reservationRepository.update(id, { status: 'cancelled' });
+        try {
+            const fullRes = await reservationRepository.findById(id);
+            if (fullRes) {
+                const client = await clientRepository.findById(fullRes.client_id);
+                if (client && client.phone) {
+                    const msg = `🍽️ *FoodSync Restaurante*\nHola ${client.name}. Lamentamos informarte que tu reservación para el día ${fullRes.date} a las ${fullRes.time} ha sido *Cancelada*. ❌\n\nComunícate por este medio para agendar en otra fecha u horario.`;
+                    whatsappService.sendMessage(client.phone, msg);
+                }
+            }
+        } catch (err) {
+            console.error('Error enviando WhatsApp en cancelación:', err);
+        }
+        return cancelledReservation;
     }
 
     async deleteReservation(id) {

@@ -10,10 +10,20 @@ class TableService {
         // Check validation for duplicate table number
         const existingTable = await tableRepository.findByTableNumber(data.table_number);
         if (existingTable) {
-            throw new AppError(`Table number ${data.table_number} already exists`, 400);
+            if (existingTable.is_active) {
+                throw new AppError(`Table number ${data.table_number} already exists`, 400);
+            } else {
+                // Reactivate and update capacity if the table was logically deleted
+                return await tableRepository.update(existingTable.table_id, {
+                    capacity: data.capacity,
+                    is_active: true
+                });
+            }
         }
 
-        return await tableRepository.create(data);
+        // Explicitly set is_active to true in case there's no DB default
+        const newData = { ...data, is_active: true };
+        return await tableRepository.create(newData);
     }
 
     async getAllTables() {
@@ -29,7 +39,11 @@ class TableService {
         if (updates.table_number) {
             const existingTable = await tableRepository.findByTableNumber(updates.table_number);
             if (existingTable && existingTable.table_id != id) {
-                throw new AppError(`Table number ${updates.table_number} already exists`, 400);
+                if (existingTable.is_active) {
+                    throw new AppError(`Table number ${updates.table_number} already exists`, 400);
+                } else {
+                    throw new AppError(`El número de mesa ${updates.table_number} pertenece a una mesa inactiva. No se puede usar.`, 400);
+                }
             }
         }
         return await tableRepository.update(id, updates);

@@ -45,6 +45,26 @@ class DailyReportRepository {
         if (error) throw new AppError(`Supabase Error: ${error.message}`, 500);
         return data;
     }
+
+    async delete(id) {
+        const { data, error } = await supabase
+            .from('daily_report')
+            .delete()
+            .eq('report_id', id)
+            .select()
+            .single();
+
+        if (error) {
+            if (error.code === 'PGRST116') {
+                throw new AppError('Daily Report not found', 404);
+            }
+            if (error.code === '22P02') {
+                throw new AppError('ID format is invalid', 400);
+            }
+            throw new AppError(`Supabase Error: ${error.message}`, 500);
+        }
+        return data;
+    }
 }
 
 export default new DailyReportRepository();
