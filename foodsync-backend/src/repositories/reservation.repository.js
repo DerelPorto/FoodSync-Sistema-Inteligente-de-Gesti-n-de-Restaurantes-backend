@@ -55,6 +55,17 @@ class ReservationRepository {
         return data;
     }
 
+    async findByDate(date) {
+        const { data, error } = await supabase
+            .from('reservation')
+            .select('*')
+            .eq('date', date)
+            .neq('status', 'cancelled');
+
+        if (error) throw new AppError(`Supabase Error: ${error.message}`, 500);
+        return data || [];
+    }
+
     async findOverlapping(tableId, date, time) {
         const { data, error } = await supabase
             .from('reservation')

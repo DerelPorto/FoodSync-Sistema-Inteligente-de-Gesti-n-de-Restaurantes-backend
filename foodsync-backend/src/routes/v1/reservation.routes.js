@@ -141,6 +141,8 @@ router
      */
     .get(reservationController.getAvailableTables);
 
+router.get('/by-date', reservationController.getReservationsByDate);
+
 router
     .route('/:id')
 

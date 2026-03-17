@@ -46,6 +46,16 @@ class ClientRepository {
         return data;
     }
 
+    async findByIds(ids) {
+        if (!ids || ids.length === 0) return [];
+        const { data, error } = await supabase
+            .from('client')
+            .select('client_id, name, phone, email')
+            .in('client_id', ids);
+        if (error) throw new AppError(`Supabase Error: ${error.message}`, 500);
+        return data || [];
+    }
+
     async findByPhone(phone) {
         const { data, error } = await supabase
             .from('client')

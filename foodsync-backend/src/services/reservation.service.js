@@ -93,6 +93,19 @@ class ReservationService {
         return await reservationRepository.findByClient(clientId);
     }
 
+    async getReservationsByDateWithClients(date) {
+        const reservations = await reservationRepository.findByDate(date);
+        if (reservations.length === 0) return [];
+        const clientIds = [...new Set(reservations.map(r => r.client_id).filter(Boolean))];
+        const clients = await clientRepository.findByIds(clientIds);
+        const clientMap = {};
+        clients.forEach(c => { clientMap[c.client_id] = c; });
+        return reservations.map(r => ({
+            ...r,
+            client: clientMap[r.client_id] || null,
+        }));
+    }
+
     async updateReservation(id, updates) {
         // Validate email format if provided
         if (updates.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(updates.email)) {

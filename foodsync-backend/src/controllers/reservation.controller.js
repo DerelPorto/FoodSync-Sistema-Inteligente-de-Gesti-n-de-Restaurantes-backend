@@ -24,6 +24,19 @@ class ReservationController {
         });
     });
 
+    getReservationsByDate = catchAsync(async (req, res, next) => {
+        const { date } = req.query;
+        if (!date) {
+            return res.status(400).json({ status: 'fail', message: 'Query "date" (YYYY-MM-DD) is required' });
+        }
+        const list = await reservationService.getReservationsByDateWithClients(date);
+        res.status(200).json({
+            status: 'success',
+            results: list.length,
+            data: { reservations: list }
+        });
+    });
+
     getAllReservations = catchAsync(async (req, res, next) => {
         const reservations = await reservationService.getAllReservations();
 

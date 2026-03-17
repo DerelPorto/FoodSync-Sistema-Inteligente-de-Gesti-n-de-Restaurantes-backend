@@ -13,12 +13,12 @@ class WhatsAppService {
 
         this.isReady = false;
 
-        this.client.on('qr', (qr) => {
-            console.log('\n======================================================');
-            console.log('🤖 ESCANEA ESTE QR DESDE TU WHATSAPP PARA CONECTAR EL BOT');
-            console.log('======================================================');
-            qrcode.generate(qr, { small: true });
-        });
+        // this.client.on('qr', (qr) => {
+        //     console.log('\n======================================================');
+        //     console.log('🤖 ESCANEA ESTE QR DESDE TU WHATSAPP PARA CONECTAR EL BOT');
+        //     console.log('======================================================');
+        //     qrcode.generate(qr, { small: true });
+        // });
 
         this.client.on('ready', () => {
             console.log('\n✅ Cliente de WhatsApp conectado y listo para enviar mensajes!');
