@@ -1,5 +1,6 @@
 import express from 'express';
 import reservationController from '../../controllers/reservation.controller.js';
+import { protect, restrictToAdmin } from '../../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
@@ -142,6 +143,83 @@ router
     .get(reservationController.getAvailableTables);
 
 router.get('/by-date', reservationController.getReservationsByDate);
+
+/**
+ * @openapi
+ * /reservations/{id}/complete:
+ *   patch:
+ *     summary: Cerrar reserva confirmada con monto de consumo (crea venta vinculada)
+ *     description: |
+ *       **Opción A (elegida):** actualiza la reserva a `completed`, inserta un registro en `sale`
+ *       con el total indicado y un detalle sintético "Consumo mesa". Requiere JWT de usuario admin
+ *       (no viewer). En la base de datos, la tabla `sale` debe incluir columnas opcionales
+ *       `reservation_id` y `client_id` (ver migración en el repositorio).
+ *     tags: [Reservations]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID de la reserva
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               total:
+ *                 type: number
+ *                 minimum: 0
+ *                 description: Monto total del consumo (DOP)
+ *               consumption_amount:
+ *                 type: number
+ *                 minimum: 0
+ *                 description: Alias de total
+ *               amount:
+ *                 type: number
+ *                 minimum: 0
+ *                 description: Alias de total
+ *           example:
+ *             total: 1250.5
+ *     responses:
+ *       200:
+ *         description: Reserva cerrada y venta creada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     reservation:
+ *                       type: object
+ *                     sale:
+ *                       type: object
+ *       400:
+ *         description: Estado inválido o monto inválido
+ *       401:
+ *         description: No autenticado
+ *       403:
+ *         description: Sin permisos (viewer)
+ *       409:
+ *         description: Reserva ya cerrada o venta ya existente
+ */
+router.patch(
+    '/:id/complete',
+    protect,
+    restrictToAdmin,
+    reservationController.completeReservation
+);
 
 router
     .route('/:id')

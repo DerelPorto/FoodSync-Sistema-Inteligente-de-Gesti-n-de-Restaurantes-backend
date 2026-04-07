@@ -54,8 +54,18 @@ class SaleService {
         };
     }
 
+    formatSaleListItem(sale) {
+        if (!sale) return sale;
+        return {
+            ...sale,
+            sale_id: sale.sale_id,
+            sale_date: sale.created_at,
+        };
+    }
+
     async getAllSales() {
-        return await saleRepository.findAll();
+        const rows = await saleRepository.findAll();
+        return (rows || []).map(s => this.formatSaleListItem(s));
     }
 
     async getSaleById(id) {

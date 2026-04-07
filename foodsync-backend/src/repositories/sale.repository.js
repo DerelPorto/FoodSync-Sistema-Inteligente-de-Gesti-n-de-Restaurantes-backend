@@ -34,6 +34,17 @@ class SaleRepository {
         return data;
     }
 
+    async findByReservationId(reservationId) {
+        const { data, error } = await supabase
+            .from('sale')
+            .select('sale_id')
+            .eq('reservation_id', reservationId)
+            .maybeSingle();
+
+        if (error) throw new AppError(`Supabase Error: ${error.message}`, 500);
+        return data;
+    }
+
     // Usually sales are not updated or deleted casually, but for completeness:
     async update(id, updates) {
         const { data, error } = await supabase

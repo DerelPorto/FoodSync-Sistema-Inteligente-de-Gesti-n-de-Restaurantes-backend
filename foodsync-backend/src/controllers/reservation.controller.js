@@ -86,6 +86,20 @@ class ReservationController {
         });
     });
 
+    completeReservation = catchAsync(async (req, res, next) => {
+        const { id } = req.params;
+        const { reservation, sale } = await reservationService.completeReservationWithSale(id, req.body);
+
+        res.status(200).json({
+            status: 'success',
+            message: 'Reserva cerrada y venta registrada',
+            data: {
+                reservation,
+                sale,
+            },
+        });
+    });
+
     deleteReservation = catchAsync(async (req, res, next) => {
         const { id } = req.params;
         await reservationService.deleteReservation(id);

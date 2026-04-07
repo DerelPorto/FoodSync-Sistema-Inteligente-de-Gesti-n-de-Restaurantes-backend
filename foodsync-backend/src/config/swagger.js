@@ -16,6 +16,16 @@ const swaggerDefinition = {
             description: 'Local development server',
         },
     ],
+    components: {
+        securitySchemes: {
+            bearerAuth: {
+                type: 'http',
+                scheme: 'bearer',
+                bearerFormat: 'JWT',
+                description: 'Token JWT devuelto por POST /auth/login (cabecera Authorization: Bearer mas el token)',
+            },
+        },
+    },
 };
 
 const options = {

@@ -30,3 +30,6 @@ out/
 Thumbs.db
 
 .wwebjs_auth/
+
+/docs
+api-2.json

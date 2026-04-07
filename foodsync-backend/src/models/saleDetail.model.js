@@ -15,7 +15,7 @@ class SaleDetail {
         if (!this.quantity || isNaN(this.quantity) || this.quantity <= 0) {
             throw new Error('Quantity must be a positive integer');
         }
-        if (!this.price || isNaN(this.price) || this.price < 0) {
+        if (this.price === undefined || this.price === null || Number.isNaN(Number(this.price)) || Number(this.price) < 0) {
             throw new Error('Price must be a non-negative number');
         }
     }

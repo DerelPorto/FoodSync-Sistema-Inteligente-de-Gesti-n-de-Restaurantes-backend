@@ -1,6 +1,8 @@
 import reservationRepository from '../repositories/reservation.repository.js';
 import tableRepository from '../repositories/table.repository.js';
 import clientRepository from '../repositories/client.repository.js';
+import saleRepository from '../repositories/sale.repository.js';
+import saleDetailRepository from '../repositories/saleDetail.repository.js';
 import whatsappService from './whatsapp.service.js';
 import AppError from '../utils/appError.js';
 
@@ -157,6 +159,75 @@ class ReservationService {
 
     async deleteReservation(id) {
         return await reservationRepository.delete(id);
+    }
+
+    /**
+     * Opción A: cierra reserva confirmada con monto de consumo, crea venta + detalle sintético.
+     * Estado final de la reserva: completed.
+     */
+    async completeReservationWithSale(id, body) {
+        const raw =
+            body.total !== undefined && body.total !== null
+                ? body.total
+                : body.consumption_amount !== undefined && body.consumption_amount !== null
+                    ? body.consumption_amount
+                    : body.amount;
+
+        if (raw === undefined || raw === null) {
+            throw new AppError(
+                'El monto es requerido. Envía "total", "consumption_amount" o "amount" (número ≥ 0).',
+                400
+            );
+        }
+
+        const total = Number(raw);
+        if (Number.isNaN(total) || total < 0) {
+            throw new AppError('El monto debe ser un número mayor o igual a 0.', 400);
+        }
+
+        const reservation = await reservationRepository.findById(id);
+
+        if (reservation.status === 'completed') {
+            throw new AppError('Esta reserva ya fue cerrada.', 409);
+        }
+        if (reservation.status !== 'confirmed') {
+            throw new AppError(
+                `Solo se pueden cerrar reservas confirmadas. Estado actual: ${reservation.status}`,
+                400
+            );
+        }
+
+        const existingSale = await saleRepository.findByReservationId(reservation.reservation_id);
+        if (existingSale?.sale_id) {
+            throw new AppError('Ya existe una venta registrada para esta reserva.', 409);
+        }
+
+        const salePayload = {
+            total,
+            created_at: new Date().toISOString(),
+        };
+        if (reservation.client_id != null) {
+            salePayload.client_id = reservation.client_id;
+        }
+        salePayload.reservation_id = reservation.reservation_id;
+
+        const newSale = await saleRepository.create(salePayload);
+
+        await saleDetailRepository.create([
+            {
+                sale_id: newSale.sale_id,
+                item_name: 'Consumo mesa',
+                quantity: 1,
+                price: total,
+            },
+        ]);
+
+        const updatedReservation = await reservationRepository.update(id, { status: 'completed' });
+
+        return {
+            reservation: updatedReservation,
+            sale: newSale,
+        };
     }
 }
 
