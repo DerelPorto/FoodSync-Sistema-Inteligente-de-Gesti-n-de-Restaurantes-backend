@@ -1,12 +1,15 @@
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
+<<<<<<< HEAD
 import { apiReference } from '@scalar/express-api-reference';
 import { swaggerSpec } from './config/swagger.js';
 
 import AppError from './utils/appError.js';
 import globalErrorHandler from './middlewares/errorHandler.js';
 import v1Router from './routes/v1/index.js';
+=======
+>>>>>>> 5dd7a39 (Primer Commit)
 
 const app = express();
 
@@ -15,6 +18,7 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
 
+<<<<<<< HEAD
 // Documentation
 app.use(
     '/docs',
@@ -28,10 +32,14 @@ app.use(
 // Routes
 app.use('/api/v1', v1Router);
 
+=======
+// Ruta de prueba
+>>>>>>> 5dd7a39 (Primer Commit)
 app.get('/', (req, res) => {
     res.json({ message: 'FoodSync API Backend - Online 🚀' });
 });
 
+<<<<<<< HEAD
 // Handle 404 - Unknown Routes
 app.all(/(.*)/, (req, res, next) => {
     next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
@@ -40,4 +48,11 @@ app.all(/(.*)/, (req, res, next) => {
 // Global Error Handler
 app.use(globalErrorHandler);
 
+=======
+// Manejo de errores 404
+app.use((req, res) => {
+    res.status(404).json({ error: 'Ruta no encontrada' });
+});
+
+>>>>>>> 5dd7a39 (Primer Commit)
 export default app;

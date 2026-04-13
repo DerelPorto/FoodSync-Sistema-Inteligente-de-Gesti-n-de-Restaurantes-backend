@@ -4,13 +4,18 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+<<<<<<< HEAD
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node --dns-result-order=ipv4first index.js",
     "dev": "nodemon --dns-result-order=ipv4first index.js"
+=======
+    "test": "echo \"Error: no test specified\" && exit 1"
+>>>>>>> 5dd7a39 (Primer Commit)
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+<<<<<<< HEAD
   "type": "module",
   "dependencies": {
     "@scalar/express-api-reference": "^0.8.39",
@@ -24,6 +29,15 @@
     "qrcode-terminal": "^0.12.0",
     "swagger-jsdoc": "^6.2.8",
     "whatsapp-web.js": "^1.34.6"
+=======
+  "type": "commonjs",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.93.2",
+    "cors": "^2.8.6",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "morgan": "^1.10.1"
+>>>>>>> 5dd7a39 (Primer Commit)
   },
   "devDependencies": {
     "nodemon": "^3.1.11"
