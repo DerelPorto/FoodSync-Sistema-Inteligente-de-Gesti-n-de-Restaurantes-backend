@@ -5,7 +5,6 @@ const router = express.Router();
 
 router
     .route('/')
-<<<<<<< HEAD
     /**
      * @openapi
      * /menu:
@@ -82,14 +81,11 @@ router
      *                     menu_item:
      *                       type: object
      */
-=======
->>>>>>> c0ea64d (Inicializar el backend con arquitectura modular, CRUD de menú, manejo de errores y configuración de Supabase.)
     .get(menuController.getAllMenu)
     .post(menuController.createMenu);
 
 router
     .route('/:id')
-<<<<<<< HEAD
 /**
  * @openapi
  * /menu/{id}:
@@ -141,9 +137,7 @@ router
  *       204:
  *         description: Menu item deleted successfully
  */
-=======
     .patch(menuController.updatePrice)
     .delete(menuController.deleteMenu);
->>>>>>> c0ea64d (Inicializar el backend con arquitectura modular, CRUD de menú, manejo de errores y configuración de Supabase.)
 
 export default router;

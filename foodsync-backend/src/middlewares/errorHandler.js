@@ -1,16 +1,12 @@
 import AppError from '../utils/appError.js';
 
 const sendErrorDev = (err, res) => {
-<<<<<<< HEAD
-    res.status(err.statusCode).send(err.message);
-=======
     res.status(err.statusCode).json({
         status: err.status,
         error: err,
         message: err.message,
         stack: err.stack
     });
->>>>>>> c0ea64d (Inicializar el backend con arquitectura modular, CRUD de menú, manejo de errores y configuración de Supabase.)
 };
 
 const sendErrorProd = (err, res) => {
